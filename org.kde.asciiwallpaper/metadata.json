@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/Wallpaper",
+    "KPlugin": {
+        "Authors": [
+            { "Name": "You" }
+        ],
+        "Id": "org.kde.asciiwallpaper",
+        "Name": "ASCII Art Wallpaper",
+        "Description": "GPU-shader dynamic ASCII art wallpaper (no video decode, procedurally animated)",
+        "Icon": "preferences-desktop-wallpaper",
+        "Version": "1.0",
+        "ServiceTypes": [
+            "Plasma/Wallpaper"
+        ]
+    }
+}
