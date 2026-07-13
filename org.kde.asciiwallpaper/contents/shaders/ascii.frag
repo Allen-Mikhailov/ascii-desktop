@@ -59,6 +59,12 @@ vec2 intersectLinePlane(
     return vec2(1, t);
 }
 
+struct ring {
+	vec2 pos;
+	float radius;
+
+};
+
 void main() {
 	float t = ubuf.iTime * 0.5;
 	vec2 fragCoord = qt_TexCoord0 * ubuf.iResolution;
@@ -104,11 +110,13 @@ void main() {
 		
 		// 0 to 1 inside circle section
 		float f = mod(rot, PI / 3.0) / (PI/3.0);
+		float f1 = (1-abs(f-0.5) *2);
 
 
-		float d = distFromCenter - ring_radius;
-		lum = max(1-abs(d/ring_thickness), 0);
-		lum = lum * (1-abs(f-0.5) *2);
+
+		float d = max(distFromCenter - ring_radius, 0);
+		lum = max(1-d/ring_thickness, 0);
+		// lum = lum * f1
 		lum = clamp(lum, 0.0, 0.999);
 		
 		ringColor = ringColor + vec3(1,1,1) * result.y;
