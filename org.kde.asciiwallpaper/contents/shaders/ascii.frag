@@ -60,13 +60,18 @@ vec2 intersectLinePlane(
 }
 
 struct ring {
-	vec2 pos;
+	vec3 pos;
 	float radius;
 
 };
 
+// const ring Rings[3] = ring[3](
+
+
+// );
+
 void main() {
-	float t = ubuf.iTime * 0.5;
+	float t = ubuf.iTime * 0.05;
 	vec2 fragCoord = qt_TexCoord0 * ubuf.iResolution;
 
 	vec2 cellOrigin = floor(fragCoord / ubuf.cellSize) * ubuf.cellSize;
@@ -83,11 +88,11 @@ void main() {
 	// Cool Code goes here
 	vec2 ring_center = vec2(0, sin(t)*0);
 	vec3 ring_center3 = vec3(ring_center, 0);
-	float ring_radius = 0.4;
-	float ring_thickness = 0.05;
+	float ring_radius = 0.3;
+	float ring_thickness = 0.2;
 
 	vec3 world_up = vec3(0.0, 1.0, 0.0);
-	vec3 look = normalize(vec3(sin(t), 0, 0.1));
+	vec3 look = normalize(vec3(-1, -1, 1));
 	mat3 ringRot = lookAtRotation(ring_center3, look, world_up);
 
 	float lum = 0.5;
@@ -106,16 +111,23 @@ void main() {
 		float v = dot(local, ringRot[1]);
 		float rot = mod(atan(v, u) + PI + t*3, PI * 2);
 		float distFromCenter = length(vec2(u, v));
-		// distFromCenter <= radius means inside the circle
+		float distFromRing = distFromCenter - ring_radius;
 		
 		// 0 to 1 inside circle section
-		float f = mod(rot, PI / 3.0) / (PI/3.0);
+		float f = mod(rot + distFromCenter * - 2, PI / 2.0) / (PI/2.0);
 		float f1 = (1-abs(f-0.5) *2);
 
 
+		// These start at 0
+		float inner_d = min(distFromRing, 0);
+		float outer_d = max(distFromRing, 0);
 
-		float d = max(distFromCenter - ring_radius, 0);
-		lum = max(1-d/ring_thickness, 0);
+		float outer = max(sign(distFromRing), 0);
+
+
+		float ring_thick = ring_thickness * (1+10*f1 * outer);
+
+		lum = max(1-abs(distFromRing)/ring_thick, 0);
 		// lum = lum * f1
 		lum = clamp(lum, 0.0, 0.999);
 		
@@ -130,7 +142,7 @@ void main() {
 	localUV.y = 1.0 - localUV.y; // atlas is top-down, GL uv is bottom-up
 
 	float coverage = glyph(localUV, charIndex);
-	vec3 color = mix(ubuf.bgColor, ringColor, lum);
+	vec3 color = mix(ubuf.bgColor, mix(ubuf.bgColor, ringColor, lum), coverage);
 
 	fragColor = vec4(color, 1.0) * ubuf.qt_Opacity;
 }

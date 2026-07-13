@@ -4,13 +4,13 @@ import org.kde.plasma.plasmoid
 WallpaperItem {
     id: root
 
-    // --- tunables ---
-    property real cellPx: 16          // ascii cell size in px (bigger = cheaper + chunkier)
-    property color fg: "#33ff66"      // matrix-green look, change to taste
+    property real cellPx: 16
+    property color fg: "#33ff66"
     property color bg: "#000000"
-    property int targetFps: 30        // ascii doesn't need 60fps, saves power
 
     property real elapsed: 0
+    property int frameSkip: 2   // only update every Nth frame; 2 = 30fps on 60hz
+    property int frameCount: 0
 
     Image {
         id: fontAtlas
@@ -18,9 +18,6 @@ WallpaperItem {
         visible: false
         smooth: false
         mipmap: false
-        // Invisible items often don't get a real texture provider in Qt Quick's
-        // scene graph. layer.enabled forces this to render to an offscreen FBO
-        // regardless of visibility, guaranteeing fontTex is a valid texture.
         layer.enabled: true
         layer.smooth: false
     }
@@ -38,10 +35,9 @@ WallpaperItem {
         fragmentShader: "../shaders/ascii.frag.qsb"
     }
 
-    Timer {
-        interval: 1000 / root.targetFps
-        running: true
-        repeat: true
-        onTriggered: root.elapsed += interval / 1000.0
-    }
+	FrameAnimation {
+		running: true
+		onTriggered: root.elapsed += frameTime
+	}
 }
+
